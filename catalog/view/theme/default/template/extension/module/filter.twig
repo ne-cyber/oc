@@ -1,0 +1,159 @@
+<div class="panel panel-default">
+  <div class="panel-heading">{{ heading_title }}</div>
+  <div class="list-group"> {% for filter_group in filter_groups %} <a class="list-group-item">{{ filter_group.name }}</a>
+      {% if filter_group.name == 'Dimension' %}
+
+        <div class="list-group-item">
+          <div id="filter-group{{ filter_group.filter_group_id }}">{% for filter in filter_group.filter %}
+              <div class="checkbox">
+                <label>{% if filter.filter_id in and_filter_category %}
+                    <input type="checkbox" name="and_filter[]" value="{{ filter.filter_id }}" checked="checked" />
+                    {{ filter.name }}
+                  {% else %}
+                    <input type="checkbox" name="and_filter[]" value="{{ filter.filter_id }}" />
+                    {{ filter.name }}
+                  {% endif %}</label>
+              </div>
+            {% endfor %}</div>
+        </div>
+
+      {% else %}
+    <div class="list-group-item">
+      <div id="filter-group{{ filter_group.filter_group_id }}">{% for filter in filter_group.filter %}
+        <div class="checkbox">
+          <label>{% if filter.filter_id in filter_category %}
+            <input type="checkbox" name="filter[]" value="{{ filter.filter_id }}" checked="checked" />
+            {{ filter.name }}
+            {% else %}
+            <input type="checkbox" name="filter[]" value="{{ filter.filter_id }}" />
+            {{ filter.name }}
+            {% endif %}</label>
+        </div>
+        {% endfor %}</div>
+    </div>
+      {% endif %}
+    {% endfor %}</div>
+  <div class="panel-footer text-right">
+    <button type="button" id="button-filter" class="btn btn-primary">{{ button_filter }}</button>
+  </div>
+</div>
+<script type="text/javascript"><!--
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const temp_url = new URL(location);
+
+        if(temp_url.searchParams.get('route') == 'common/home' || temp_url.searchParams.get('route') == null) {
+            const all_product = document.getElementById('all_product');
+            const url = new URL(location);
+            url.searchParams.set('route', 'extension/module/ajax_all_product');
+            window.url = url;
+
+            let request = new XMLHttpRequest();
+            request.onload = function () {
+                all_product.innerHTML = this.responseText;
+
+                setGridView();
+            };
+
+            request.open('GET', url.href);
+            request.send();
+        }
+        else if(temp_url.searchParams.get('route') == 'product/category')
+        {
+            const product_category = document.getElementById('my-product');
+            const url = new URL(location);
+            url.searchParams.set('route', 'product/ajax_category');
+
+            window.url = url;
+            //alert(url.href);
+            let request = new XMLHttpRequest();
+            request.onload = function () {
+                product_category.innerHTML = this.responseText;
+
+                setGridView();
+            };
+
+            request.open('GET', url.href);
+            request.send();
+        }
+
+
+    });
+
+
+
+
+$(":input[name^=\'filter\'], :input[name^=\'and_filter\']").on('click', function() {
+
+	filter = [];
+    and_filter = [];
+
+	$('input[name^=\'filter\']:checked').each(function(element) {
+		filter.push(this.value);
+	});
+
+    $('input[name^=\'and_filter\']:checked').each(function(element) {
+      and_filter.push(this.value);
+    });
+
+	const temp_url = new URL(window.url);
+
+    if(temp_url.searchParams.get('route') == 'extension/module/ajax_all_product') {
+
+        const all_product = document.getElementById('all_product');
+        const url = new URL(window.url);
+        //url.searchParams.set('route', 'extension/module/ajax_all_product');
+        url.searchParams.set('filter', filter.join(','));
+        url.searchParams.set('and_filter', and_filter.join(','));
+
+        let request = new XMLHttpRequest();
+        request.onload = function () {
+            all_product.innerHTML = this.responseText;
+
+            setGridView();
+        };
+
+        request.open('GET', url.href);
+        request.send();
+    }
+    else if(temp_url.searchParams.get('route') == 'product/ajax_category') {
+        const product_category = document.getElementById('my-product');
+        const url = new URL(window.url);
+        //alert(url.href);
+        //url.searchParams.set('route', 'product/category');
+        url.searchParams.set('filter', filter.join(','));
+        url.searchParams.set('and_filter', and_filter.join(','));
+
+        let request = new XMLHttpRequest();
+        request.onload = function () {
+            product_category.innerHTML = this.responseText;
+
+            setGridView();
+        };
+
+        request.open('GET', url.href);
+        request.send();
+    }
+
+
+});
+
+    function setGridView() {
+        var cols = $('#column-right, #column-left').length;
+
+        if (cols == 2) {
+            $('#content .product-list').attr('class', 'product-layout product-grid col-lg-6 col-md-6 col-sm-12 col-xs-12');
+        } else if (cols == 1) {
+            $('#content .product-list').attr('class', 'product-layout product-grid col-lg-3 col-md-3 col-sm-6 col-xs-12');
+        } else {
+            $('#content .product-list').attr('class', 'product-layout product-grid col-lg-3 col-md-3 col-sm-6 col-xs-12');
+        }
+
+        $('#list-view').removeClass('active');
+        $('#grid-view').addClass('active');
+
+        localStorage.setItem('display', 'grid');
+    }
+
+//--></script> 
